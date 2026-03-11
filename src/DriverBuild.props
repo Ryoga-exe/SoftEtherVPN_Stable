@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <SoftEtherSrcDir Condition="'$(SoftEtherSrcDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))</SoftEtherSrcDir>
+    <SolutionDir Condition="'$(SolutionDir)' == ''">$(SoftEtherSrcDir)</SolutionDir>
+  </PropertyGroup>
+
+  <!-- WDK 10.0.26100.0 installs VS 17 task assemblies, but VS 18 requests 18.0 by default. -->
+  <PropertyGroup Condition="'$(PlatformToolset)' == 'WindowsKernelModeDriver10.0' and '$(VisualStudioVersion)' == '18.0'">
+    <VisualStudioVersion>17.0</VisualStudioVersion>
+  </PropertyGroup>
+</Project>
