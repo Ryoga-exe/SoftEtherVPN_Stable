@@ -9,6 +9,10 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -29,6 +33,12 @@
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -38,20 +48,44 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>17.0.36518.2</_ProjectFileVersion>
+    <NeoBaseDir>$(MSBuildThisFileDirectory)..\</NeoBaseDir>
+    <NeoRepoRoot Condition="'$(SolutionDir)' != ''">$(SolutionDir)</NeoRepoRoot>
+    <NeoRepoRoot Condition="'$(NeoRepoRoot)' == ''">$(NeoBaseDir)</NeoRepoRoot>
+    <WindowsTargetPlatformVersion Condition="'$(WindowsTargetPlatformVersion)' == '' or '$(WindowsTargetPlatformVersion)' == '10.0'">10.0.26100.0</WindowsTargetPlatformVersion>
+    <NeoWindowsSdkDir Condition="'$(WindowsSdkDir)' != ''">$(WindowsSdkDir)</NeoWindowsSdkDir>
+    <NeoWindowsSdkDir Condition="'$(NeoWindowsSdkDir)' == ''">C:\Program Files (x86)\Windows Kits\10\</NeoWindowsSdkDir>
+    <NeoVersionResDir>$(NeoBaseDir)tmp\VersionResources\</NeoVersionResDir>
+    <BuildUtilPath>$(NeoBaseDir)bin\BuildUtil.exe</BuildUtilPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)BuiltDriverPackages\Neo\x86\</OutDir>
+    <OutDir>$(NeoRepoRoot)BuiltDriverPackages\Neo\x86\</OutDir>
     <IntDir>$(Platform)_$(Configuration)\</IntDir>
+    <TargetName>Neo_x86</TargetName>
+    <TargetExt>.sys</TargetExt>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)BuiltDriverPackages\Neo\x64\</OutDir>
+    <OutDir>$(NeoRepoRoot)BuiltDriverPackages\Neo\x64\</OutDir>
     <IntDir>$(Platform)_$(Configuration)\</IntDir>
+    <TargetName>Neo_x64</TargetName>
+    <TargetExt>.sys</TargetExt>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <OutDir>$(NeoRepoRoot)BuiltDriverPackages\Neo\arm64\</OutDir>
+    <IntDir>$(Platform)_$(Configuration)\</IntDir>
+    <TargetName>Neo_arm64</TargetName>
+    <TargetExt>.sys</TargetExt>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
@@ -62,7 +96,7 @@
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;C:\WINDDK\7600.16385.0\inc\ddk;C:\WinDDK\7600.16385.0\inc\api;C:\WinDDK\7600.16385.0\inc\crt;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(NeoBaseDir)Mayaqua\win32_inc;C:\WINDDK\7600.16385.0\inc\ddk;C:\WinDDK\7600.16385.0\inc\api;C:\WinDDK\7600.16385.0\inc\crt;$(NeoBaseDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;NEO_EXPORTS;VPN_SPEED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <ExceptionHandling />
@@ -78,18 +112,18 @@
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <PreLinkEvent>
-      <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVersionResource "$(TargetPath)" /OUT:"$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res" /PRODUCT:"SoftEther VPN"</Command>
+      <Command>"$(BuildUtilPath)" /CMD:GenerateVersionResource "$(TargetPath)" /OUT:"$(NeoVersionResDir)$(ProjectName)_$(Platform).res" /PRODUCT:"SoftEther VPN"</Command>
     </PreLinkEvent>
     <Link>
       <AdditionalOptions>/driver /subsystem:native,5.00 /FULLBUILD /align:0x80 /osversion:5.00 /STACK:0x40000,0x1000 /MERGE:_PAGE=PAGE /MERGE:_TEXT=.text /NODEFAULTLIB /stub:C:\WINDDK\7600.16385.0\lib\wnet\stub512.com /ALIGN:4096 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>wdm.lib;ndis.lib;wdmsec.lib;$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)Neo_x86.sys</OutputFile>
+      <AdditionalDependencies>wdm.lib;ndis.lib;wdmsec.lib;$(NeoVersionResDir)$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>C:\WINDDK\7600.16385.0\lib\wnet\i386;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(SolutionDir)DebugFiles\pdb\$(Platform)_$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(NeoRepoRoot)DebugFiles\pdb\$(Platform)_$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(SolutionDir)DebugFiles\map\$(Platform)_$(Configuration)\$(ProjectName).map</MapFileName>
+      <MapFileName>$(NeoRepoRoot)DebugFiles\map\$(Platform)_$(Configuration)\$(ProjectName).map</MapFileName>
       <SubSystem>NotSet</SubSystem>
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
@@ -98,12 +132,9 @@
       <RandomizedBaseAddress />
       <FixedBaseAddress>false</FixedBaseAddress>
       <DataExecutionPrevention />
-      <ImportLibrary>$(SolutionDir)tmp\lib\$(Platform)_$(Configuration)\$(ProjectName).lib</ImportLibrary>
+      <ImportLibrary>$(NeoRepoRoot)tmp\lib\$(Platform)_$(Configuration)\$(ProjectName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
-    <PostBuildEvent>
-      <Command />
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -114,7 +145,7 @@
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;C:\WINDDK\7600.16385.0\inc\ddk;C:\WinDDK\7600.16385.0\inc\api;C:\WinDDK\7600.16385.0\inc\crt;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(NeoBaseDir)Mayaqua\win32_inc;$(NeoBaseDir);"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\km";"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\km\crt";"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;NEO_EXPORTS;VPN_SPEED;CPU_64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <ExceptionHandling />
@@ -129,19 +160,22 @@
       <CompileAs>CompileAsC</CompileAs>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\um";"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <PreLinkEvent>
-      <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVersionResource "$(TargetPath)" /OUT:"$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res" /PRODUCT:"SoftEther VPN"</Command>
+      <Command>"$(BuildUtilPath)" /CMD:GenerateVersionResource "$(TargetPath)" /OUT:"$(NeoVersionResDir)$(ProjectName)_$(Platform).res" /PRODUCT:"SoftEther VPN"</Command>
     </PreLinkEvent>
     <Link>
-      <AdditionalOptions>/driver /subsystem:native /FULLBUILD /align:0x80 /osversion:5.00 /STACK:0x40000,0x1000 /MERGE:_PAGE=PAGE /MERGE:_TEXT=.text /NODEFAULTLIB /stub:C:\WINDDK\7600.16385.0\lib\wnet\stub512.com /ALIGN:4096 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>wdm.lib;ndis.lib;wdmsec.lib;$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)Neo_x64.sys</OutputFile>
-      <AdditionalLibraryDirectories>C:\WINDDK\7600.16385.0\lib\wnet\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/driver /subsystem:native /FULLBUILD /align:0x80 /osversion:10.0 /STACK:0x40000,0x1000 /MERGE:_PAGE=PAGE /MERGE:_TEXT=.text /NODEFAULTLIB /ALIGN:4096 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>wdm.lib;ndis.lib;wdmsec.lib;$(NeoVersionResDir)$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>"$(NeoWindowsSdkDir)Lib\$(WindowsTargetPlatformVersion)\km\x64";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(SolutionDir)DebugFiles\pdb\$(Platform)_$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(NeoRepoRoot)DebugFiles\pdb\$(Platform)_$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(SolutionDir)DebugFiles\map\$(Platform)_$(Configuration)\$(ProjectName).map</MapFileName>
+      <MapFileName>$(NeoRepoRoot)DebugFiles\map\$(Platform)_$(Configuration)\$(ProjectName).map</MapFileName>
       <SubSystem>NotSet</SubSystem>
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
@@ -150,12 +184,56 @@
       <RandomizedBaseAddress />
       <FixedBaseAddress>false</FixedBaseAddress>
       <DataExecutionPrevention />
-      <ImportLibrary>$(SolutionDir)tmp\lib\$(Platform)_$(Configuration)\$(ProjectName).lib</ImportLibrary>
+      <ImportLibrary>$(NeoRepoRoot)tmp\lib\$(Platform)_$(Configuration)\$(ProjectName).lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
-    <PostBuildEvent>
-      <Command />
-    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>$(NeoBaseDir)Mayaqua\win32_inc;$(NeoBaseDir);"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\km";"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\km\crt";"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;NEO_EXPORTS;VPN_SPEED;CPU_64;NEO_ARM64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>false</StringPooling>
+      <ExceptionHandling />
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <StructMemberAlignment>8Bytes</StructMemberAlignment>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\um";"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <PreLinkEvent>
+      <Command>"$(BuildUtilPath)" /CMD:GenerateVersionResource "$(TargetPath)" /OUT:"$(NeoVersionResDir)$(ProjectName)_$(Platform).res" /PRODUCT:"SoftEther VPN"</Command>
+    </PreLinkEvent>
+    <Link>
+      <AdditionalOptions>/machine:arm64 /driver /subsystem:native /FULLBUILD /align:0x80 /osversion:10.0 /STACK:0x40000,0x2000 /MERGE:_PAGE=PAGE /MERGE:_TEXT=.text /NODEFAULTLIB /ALIGN:4096 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>wdm.lib;ndis.lib;wdmsec.lib;$(NeoVersionResDir)$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>"$(NeoWindowsSdkDir)Lib\$(WindowsTargetPlatformVersion)\km\arm64";%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(NeoRepoRoot)DebugFiles\pdb\$(Platform)_$(Configuration)\$(ProjectName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(NeoRepoRoot)DebugFiles\map\$(Platform)_$(Configuration)\$(ProjectName).map</MapFileName>
+      <SubSystem>NotSet</SubSystem>
+      <OptimizeReferences>false</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <EntryPointSymbol>DriverEntry</EntryPointSymbol>
+      <BaseAddress>0x10000</BaseAddress>
+      <RandomizedBaseAddress />
+      <FixedBaseAddress>false</FixedBaseAddress>
+      <DataExecutionPrevention />
+      <ImportLibrary>$(NeoRepoRoot)tmp\lib\$(Platform)_$(Configuration)\$(ProjectName).lib</ImportLibrary>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="NDIS5.c" />

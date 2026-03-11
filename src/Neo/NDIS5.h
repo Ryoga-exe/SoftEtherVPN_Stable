@@ -109,7 +109,10 @@
 #ifndef	CPU_64
 #define	_X86_
 #else	// CPU_64
-#ifndef	NEO_IA64
+#ifdef	NEO_ARM64
+#define	_ARM64_
+#define	ARM64
+#elif !defined(NEO_IA64)
 #define	_AMD64_
 #define	AMD64
 #else	// NEO_IA64
