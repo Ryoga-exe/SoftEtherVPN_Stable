@@ -112,17 +112,12 @@ static UINT64 max_speed = NEO_MAX_SPEED_DEFAULT;
 static bool keep_link = false;
 static UINT reg_if_type = IF_TYPE_ETHERNET_CSMACD;
 
-BOOLEAN
-PsGetVersion(
-			 PULONG MajorVersion OPTIONAL,
-			 PULONG MinorVersion OPTIONAL,
-			 PULONG BuildNumber OPTIONAL,
-			 PUNICODE_STRING CSDVersion OPTIONAL
-			 );
-
 // Memory related
 static NDIS_PHYSICAL_ADDRESS HighestAcceptableMax = NDIS_PHYSICAL_ADDRESS_CONST(-1, -1);
 NDIS_HANDLE ndis_miniport_driver_handle = NULL;
+
+#define NEO_INC_CURRENT_DISPATCH() InterlockedIncrement((volatile LONG *)&ctx->NumCurrentDispatch)
+#define NEO_DEC_CURRENT_DISPATCH() InterlockedDecrement((volatile LONG *)&ctx->NumCurrentDispatch)
 
 // Flag for whether Windows 8
 bool g_is_win8 = false;
@@ -482,7 +477,7 @@ void NeoNdisCrash2(UINT a, UINT b, UINT c, UINT d)
 void NeoNdisCrash()
 {
 	NEO_QUEUE *q;
-	q = (NEO_QUEUE *)0xACACACAC;
+	q = (NEO_QUEUE *)(ULONG_PTR)0xACACACAC;
 	q->Size = 128;
 	NeoCopy(q->Buf, "ABCDEFG", 8);
 }
@@ -501,7 +496,7 @@ NTSTATUS NeoNdisDispatch(DEVICE_OBJECT *DeviceObject, IRP *Irp)
 		return NDIS_STATUS_FAILURE;
 	}
 
-	InterlockedIncrement(&ctx->NumCurrentDispatch);
+	NEO_INC_CURRENT_DISPATCH();
 
 	// Get the IRP stack
 	stack = IoGetCurrentIrpStackLocation(Irp);
@@ -516,7 +511,7 @@ NTSTATUS NeoNdisDispatch(DEVICE_OBJECT *DeviceObject, IRP *Irp)
 	{
 		// Device driver is terminating
 		Irp->IoStatus.Information = STATUS_UNSUCCESSFUL;
-		InterlockedDecrement(&ctx->NumCurrentDispatch);
+		NEO_DEC_CURRENT_DISPATCH();
 
 		IoCompleteRequest(Irp, IO_NO_INCREMENT);
 
@@ -651,7 +646,7 @@ NTSTATUS NeoNdisDispatch(DEVICE_OBJECT *DeviceObject, IRP *Irp)
 		break;
 	}
 
-	InterlockedDecrement(&ctx->NumCurrentDispatch);
+	NEO_DEC_CURRENT_DISPATCH();
 
 	IoCompleteRequest(Irp, IO_NO_INCREMENT);
 
@@ -799,7 +794,11 @@ BOOL NeoLoadRegistory()
 		LARGE_INTEGER current_time;
 		UCHAR *current_time_bytes;
 
+#if defined(_AMD64_) || defined(_ARM64_)
+		KeQuerySystemTimePrecise(&current_time);
+#else	// defined(_AMD64_) || defined(_ARM64_)
 		KeQuerySystemTime(&current_time);
+#endif	// defined(_AMD64_) || defined(_ARM64_)
 
 		current_time_bytes = (UCHAR *)&current_time;
 
@@ -1329,7 +1328,7 @@ void NeoCheckConnectState()
 	state.Header.Revision = NDIS_LINK_STATE_REVISION_1;
 	state.Header.Size = NDIS_SIZEOF_LINK_STATE_REVISION_1;
 
-	state.MediaDuplexState = NdisPauseFunctionsSendAndReceive;
+	state.MediaDuplexState = MediaDuplexStateFull;
 	state.XmitLinkSpeed = state.RcvLinkSpeed = max_speed;
 	state.PauseFunctions = NdisPauseFunctionsUnsupported;
 
@@ -1474,7 +1473,7 @@ void NeoNdisSendNetBufferLists(NDIS_HANDLE MiniportAdapterContext,
 		send_complete_flags |= NDIS_SEND_COMPLETE_FLAGS_DISPATCH_LEVEL;
 	}
 
-	InterlockedIncrement(&ctx->NumCurrentDispatch);
+	NEO_INC_CURRENT_DISPATCH();
 
 	// Update the connection state
 	NeoCheckConnectState();
@@ -1498,7 +1497,7 @@ void NeoNdisSendNetBufferLists(NDIS_HANDLE MiniportAdapterContext,
 
 		NeoNdisSetNetBufferListsStatus(NetBufferLists, status);
 
-		InterlockedDecrement(&ctx->NumCurrentDispatch);
+		NEO_DEC_CURRENT_DISPATCH();
 
 		NdisMSendNetBufferListsComplete(ctx->NdisMiniport, NetBufferLists, send_complete_flags);
 
@@ -1531,7 +1530,7 @@ void NeoNdisSendNetBufferLists(NDIS_HANDLE MiniportAdapterContext,
 
 			NeoNdisSetNetBufferListsStatus(NetBufferLists, status);
 
-			InterlockedDecrement(&ctx->NumCurrentDispatch);
+			NEO_DEC_CURRENT_DISPATCH();
 
 			NdisMSendNetBufferListsComplete(ctx->NdisMiniport, NetBufferLists, send_complete_flags);
 
@@ -1605,7 +1604,7 @@ void NeoNdisSendNetBufferLists(NDIS_HANDLE MiniportAdapterContext,
 	NeoUnlockPacketQueue();
 
 	// Notify the transmission completion
-	InterlockedDecrement(&ctx->NumCurrentDispatch);
+	NEO_DEC_CURRENT_DISPATCH();
 	NdisMSendNetBufferListsComplete(ctx->NdisMiniport, NetBufferLists, send_complete_flags);
 }
 

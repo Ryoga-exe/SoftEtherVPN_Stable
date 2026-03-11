@@ -109,6 +109,10 @@
 #ifndef	CPU_64
 #define	_X86_
 #else	// CPU_64
+#ifdef	NEO_ARM64
+#define	_ARM64_
+#define	ARM64
+#else	// NEO_ARM64
 #ifndef	NEO_IA64
 #define	_AMD64_
 #define	AMD64
@@ -116,16 +120,27 @@
 #define	_IA64_
 #define	IA64
 #endif	// NEO_IA64
+#endif	// NEO_ARM64
 #endif	// CPU_64
 #define	NDIS_MINIPORT_DRIVER
-// NDIS 6.2
+// NDIS version
+#ifdef	NEO_ARM64
+#define	NDIS630_MINIPORT
+#define	NDIS_SUPPORT_NDIS61			1
+#define	NDIS_SUPPORT_NDIS620		1
+#define	NDIS_SUPPORT_NDIS630		1
+#define NEO_NDIS_MAJOR_VERSION		6
+#define NEO_NDIS_MINOR_VERSION		30
+#else	// NEO_ARM64
 #define	NDIS620_MINIPORT
 #define	NDIS_SUPPORT_NDIS61			1
 #define	NDIS_SUPPORT_NDIS620		1
 #define NEO_NDIS_MAJOR_VERSION		6
 #define NEO_NDIS_MINOR_VERSION		20
+#endif	// NEO_ARM64
 #define	NDIS_WDM					1
 
+#include <intrin.h>
 #include <wdm.h>
 #include <ndis.h>
 #include <stdio.h>
