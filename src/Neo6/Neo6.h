@@ -270,6 +270,7 @@ typedef struct _NEO_CTX
 	NEO_QUEUE *PacketQueue;				// Transmit packet queue
 	NEO_QUEUE *Tail;					// Tail of the transmission packet queue
 	UINT NumPacketQueue;				// Number of queued packet
+	NEO_LOCK *DispatchLock;				// Dispatch counter lock
 	NEO_LOCK *PacketQueueLock;			// Transmit packet queue lock
 	NEO_STATUS Status;					// Status
 	UINT CurrentPacketFilter;			// Current packet filter value

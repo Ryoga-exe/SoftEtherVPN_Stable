@@ -116,8 +116,13 @@ static UINT reg_if_type = IF_TYPE_ETHERNET_CSMACD;
 static NDIS_PHYSICAL_ADDRESS HighestAcceptableMax = NDIS_PHYSICAL_ADDRESS_CONST(-1, -1);
 NDIS_HANDLE ndis_miniport_driver_handle = NULL;
 
+#if defined(_ARM64_)
+#define NEO_INC_CURRENT_DISPATCH() NdisInterlockedAddUlong((PULONG)&ctx->NumCurrentDispatch, 1, &ctx->DispatchLock->spin_lock)
+#define NEO_DEC_CURRENT_DISPATCH() NdisInterlockedAddUlong((PULONG)&ctx->NumCurrentDispatch, (ULONG)-1, &ctx->DispatchLock->spin_lock)
+#else	// defined(_ARM64_)
 #define NEO_INC_CURRENT_DISPATCH() InterlockedIncrement((volatile LONG *)&ctx->NumCurrentDispatch)
 #define NEO_DEC_CURRENT_DISPATCH() InterlockedDecrement((volatile LONG *)&ctx->NumCurrentDispatch)
+#endif	// defined(_ARM64_)
 
 // Flag for whether Windows 8
 bool g_is_win8 = false;

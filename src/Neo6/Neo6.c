@@ -480,6 +480,13 @@ BOOL NeoInit()
 	// Initialize the context
 	NeoZero(ctx, sizeof(NEO_CTX));
 
+	// Create a lock for the dispatch counter
+	ctx->DispatchLock = NeoNewLock();
+	if (ctx->DispatchLock == NULL)
+	{
+		return FALSE;
+	}
+
 	// Initialize the status information
 	NeoNewStatus(&ctx->Status);
 
@@ -497,6 +504,10 @@ void NeoShutdown()
 
 	// Relaese the status information
 	NeoFreeStatus(&ctx->Status);
+
+	// Release the dispatch counter lock
+	NeoFreeLock(ctx->DispatchLock);
+	ctx->DispatchLock = NULL;
 
 	NeoZero(ctx, sizeof(NEO_CTX));
 }
