@@ -121,6 +121,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Win32;
 using CoreUtil;
 
 namespace BuildUtil
@@ -349,6 +350,207 @@ namespace BuildUtil
 		public static readonly string SoftEtherBuildDir = Env.SystemDir.Substring(0, 2) + @"\tmp\softether_build_dir";
 		public static readonly string OpenSourceDestDir = Env.SystemDir.Substring(0, 2) + @"\tmp\softether_oss_dest_dir";
 
+		private static string NormalizeDirName(string dirName)
+		{
+			if (Str.IsEmptyStr(dirName))
+			{
+				return "";
+			}
+
+			return IO.RemoteLastEnMark(IO.NormalizePath(dirName));
+		}
+
+		private static string GetFirstExistingDirectory(IEnumerable<string> candidates)
+		{
+			foreach (string candidate in candidates)
+			{
+				string normalized = NormalizeDirName(candidate);
+
+				if (Str.IsEmptyStr(normalized) == false && Directory.Exists(normalized))
+				{
+					return normalized;
+				}
+			}
+
+			return "";
+		}
+
+		private static string GetFirstExistingFile(IEnumerable<string> candidates)
+		{
+			foreach (string candidate in candidates)
+			{
+				if (Str.IsEmptyStr(candidate))
+				{
+					continue;
+				}
+
+				string normalized = IO.NormalizePath(candidate);
+				if (File.Exists(normalized))
+				{
+					return normalized;
+				}
+			}
+
+			return "";
+		}
+
+		private static void AddVisualStudioVcCandidates(List<string> candidates, string baseDir)
+		{
+			if (Directory.Exists(baseDir) == false)
+			{
+				return;
+			}
+
+			string[] preferredVersions = { "2022", "17", "18", "2019", "16", "2017", "15", };
+			foreach (string version in preferredVersions)
+			{
+				string versionDir = Path.Combine(baseDir, version);
+				if (Directory.Exists(versionDir))
+				{
+					AddVisualStudioVcCandidatesForVersion(candidates, versionDir);
+				}
+			}
+
+			foreach (string versionDir in Directory.GetDirectories(baseDir))
+			{
+				AddVisualStudioVcCandidatesForVersion(candidates, versionDir);
+			}
+		}
+
+		private static void AddVisualStudioVcCandidatesForVersion(List<string> candidates, string versionDir)
+		{
+			foreach (string editionDir in Directory.GetDirectories(versionDir))
+			{
+				string vcDir = Path.Combine(editionDir, "VC");
+				if (Directory.Exists(vcDir))
+				{
+					candidates.Add(vcDir);
+				}
+			}
+		}
+
+		private static string FindVisualStudioVCDir()
+		{
+			List<string> candidates = new List<string>();
+			string envVcToolsDir = Environment.GetEnvironmentVariable("VCToolsInstallDir");
+			string envVsInstallDir = Environment.GetEnvironmentVariable("VSINSTALLDIR");
+			string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+			string programFilesX86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+
+			if (Str.IsEmptyStr(programFilesX86))
+			{
+				programFilesX86 = programFiles;
+			}
+
+			if (Str.IsEmptyStr(envVcToolsDir) == false)
+			{
+				candidates.Add(Path.Combine(envVcToolsDir, @"..\.."));
+			}
+			if (Str.IsEmptyStr(envVsInstallDir) == false)
+			{
+				candidates.Add(Path.Combine(envVsInstallDir, "VC"));
+			}
+
+			candidates.Add(IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Microsoft\VisualStudio\9.0\Setup\VC", "ProductDir")));
+			candidates.Add(IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Wow6432Node\Microsoft\VisualStudio\9.0\Setup\VC", "ProductDir")));
+
+			AddVisualStudioVcCandidates(candidates, Path.Combine(programFiles, "Microsoft Visual Studio"));
+			AddVisualStudioVcCandidates(candidates, Path.Combine(programFilesX86, "Microsoft Visual Studio"));
+
+			return GetFirstExistingDirectory(candidates);
+		}
+
+		private static string FindVisualStudioVCBatchFileName(string vcDir)
+		{
+			return GetFirstExistingFile(new string[]
+			{
+				Path.Combine(vcDir, @"Auxiliary\Build\vcvarsall.bat"),
+				Path.Combine(vcDir, "vcvarsall.bat"),
+			});
+		}
+
+		private static string ReadRegistryStringValue(RegistryKey rootKey, string subKey, string valueName)
+		{
+			try
+			{
+				using (RegistryKey key = rootKey.OpenSubKey(subKey))
+				{
+					if (key == null)
+					{
+						return "";
+					}
+
+					object value = key.GetValue(valueName);
+					if (value == null)
+					{
+						return "";
+					}
+
+					return value.ToString();
+				}
+			}
+			catch
+			{
+				return "";
+			}
+		}
+
+		private static string FindMicrosoftSdkDir()
+		{
+			List<string> candidates = new List<string>();
+			string envWindowsSdkDir = Environment.GetEnvironmentVariable("WindowsSdkDir");
+
+			if (Str.IsEmptyStr(envWindowsSdkDir) == false)
+			{
+				candidates.Add(envWindowsSdkDir);
+			}
+
+			candidates.Add(ReadRegistryStringValue(Registry.LocalMachine, @"SOFTWARE\Microsoft\Windows Kits\Installed Roots", "KitsRoot10"));
+			candidates.Add(ReadRegistryStringValue(Registry.LocalMachine, @"SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots", "KitsRoot10"));
+			candidates.Add(IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A", "InstallationFolder")));
+			candidates.Add(IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A", "InstallationFolder")));
+
+			return GetFirstExistingDirectory(candidates);
+		}
+
+		private static string NormalizeSdkVersion(string sdkVersion)
+		{
+			if (Str.IsEmptyStr(sdkVersion))
+			{
+				return "";
+			}
+
+			return sdkVersion.Trim().Trim('\\', '/');
+		}
+
+		private static string FindWindowsSdkBinary(string sdkDir, string toolName, bool x86Dir)
+		{
+			List<string> candidates = new List<string>();
+			string sdkVersion = NormalizeSdkVersion(Environment.GetEnvironmentVariable("WindowsSDKVersion"));
+			string arch = x86Dir ? "x86" : "x64";
+			string binDir = Path.Combine(sdkDir, "bin");
+
+			if (Str.IsEmptyStr(sdkVersion) == false)
+			{
+				candidates.Add(Path.Combine(Path.Combine(Path.Combine(binDir, sdkVersion), arch), toolName));
+				candidates.Add(Path.Combine(Path.Combine(binDir, sdkVersion), toolName));
+			}
+
+			if (Directory.Exists(binDir))
+			{
+				foreach (string versionDir in Directory.GetDirectories(binDir))
+				{
+					candidates.Add(Path.Combine(Path.Combine(versionDir, arch), toolName));
+					candidates.Add(Path.Combine(versionDir, toolName));
+				}
+			}
+
+			candidates.Add(Path.Combine(Path.Combine(binDir, arch), toolName));
+			candidates.Add(Path.Combine(binDir, toolName));
+
+			return GetFirstExistingFile(candidates);
+		}
+
 		// Initialize
 		static Paths()
 		{
@@ -366,15 +568,7 @@ namespace BuildUtil
 			}
 
 			// Get the VC++ directory
-			// Visual Studio 2008
-			if (IntPtr.Size == 4)
-			{
-				Paths.VisualStudioVCDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Microsoft\VisualStudio\9.0\Setup\VC", "ProductDir"));
-			}
-			else
-			{
-				Paths.VisualStudioVCDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Wow6432Node\Microsoft\VisualStudio\9.0\Setup\VC", "ProductDir"));
-			}
+			Paths.VisualStudioVCDir = FindVisualStudioVCDir();
 			if (Str.IsEmptyStr(Paths.VisualStudioVCDir))
 			{
 				throw new ApplicationException("Visual C++ directory not found.\n");
@@ -385,29 +579,34 @@ namespace BuildUtil
 			}
 
 			// Get the VC++ batch file name
-			Paths.VisualStudioVCBatchFileName = Path.Combine(Paths.VisualStudioVCDir, "vcvarsall.bat");
-			if (File.Exists(Paths.VisualStudioVCBatchFileName) == false)
+			Paths.VisualStudioVCBatchFileName = FindVisualStudioVCBatchFileName(Paths.VisualStudioVCDir);
+			if (Str.IsEmptyStr(Paths.VisualStudioVCBatchFileName))
 			{
-				throw new ApplicationException(string.Format("File '{0}' not found.", Paths.VisualStudioVCBatchFileName));
+				throw new ApplicationException(string.Format("File '{0}' not found.", Path.Combine(Paths.VisualStudioVCDir, @"Auxiliary\Build\vcvarsall.bat")));
 			}
 
 			bool x86_dir = false;
 
-			// Get Microsoft SDK 6.0a directory
-			if (IntPtr.Size == 4)
+			// Get Microsoft SDK directory
+			Paths.MicrosoftSDKDir = FindMicrosoftSdkDir();
+			if (Str.IsEmptyStr(Paths.MicrosoftSDKDir))
 			{
-				Paths.MicrosoftSDKDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A", "InstallationFolder"));
-			}
-			else
-			{
-				Paths.MicrosoftSDKDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A", "InstallationFolder"));
+				throw new ApplicationException("Microsoft SDK directory not found.\n");
 			}
 
 			// Get makecat.exe file name
-			Paths.MakeCatFilename = Path.Combine(Paths.MicrosoftSDKDir, @"bin\" + (x86_dir ? @"x86\" : "") + "makecat.exe");
+			Paths.MakeCatFilename = FindWindowsSdkBinary(Paths.MicrosoftSDKDir, "makecat.exe", x86_dir);
+			if (Str.IsEmptyStr(Paths.MakeCatFilename))
+			{
+				throw new ApplicationException("makecat.exe not found.\n");
+			}
 
 			// Get the rc.exe file name
-			Paths.RcFilename = Path.Combine(Paths.MicrosoftSDKDir, @"bin\" + (x86_dir ? @"x86\" : "") + "rc.exe");
+			Paths.RcFilename = FindWindowsSdkBinary(Paths.MicrosoftSDKDir, "rc.exe", x86_dir);
+			if (Str.IsEmptyStr(Paths.RcFilename))
+			{
+				throw new ApplicationException("rc.exe not found.\n");
+			}
 
 			// Get the cmd.exe file name
 			Paths.CmdFileName = Path.Combine(Env.SystemDir, "cmd.exe");
