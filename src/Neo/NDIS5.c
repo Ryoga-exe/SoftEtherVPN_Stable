@@ -111,14 +111,6 @@
 static UINT max_speed = NEO_MAX_SPEED_DEFAULT;
 static bool keep_link = false;
 
-BOOLEAN
-PsGetVersion(
-			 PULONG MajorVersion OPTIONAL,
-			 PULONG MinorVersion OPTIONAL,
-			 PULONG BuildNumber OPTIONAL,
-			 PUNICODE_STRING CSDVersion OPTIONAL
-			 );
-
 // Memory related
 static NDIS_PHYSICAL_ADDRESS HighestAcceptableMax = NDIS_PHYSICAL_ADDRESS_CONST(-1, -1);
 NDIS_HANDLE ndis_wrapper_handle = NULL;

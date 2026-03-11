@@ -107,14 +107,31 @@
 
 // Win32 DDK related
 #ifndef	CPU_64
+#ifndef	_X86_
 #define	_X86_
+#endif	// _X86_
 #else	// CPU_64
-#ifndef	NEO_IA64
+#if defined(_ARM64_) || defined(ARM64)
+#ifndef	_ARM64_
+#define	_ARM64_
+#endif	// _ARM64_
+#ifndef	ARM64
+#define	ARM64
+#endif	// ARM64
+#elif !defined(NEO_IA64)
+#ifndef	_AMD64_
 #define	_AMD64_
+#endif	// _AMD64_
+#ifndef	AMD64
 #define	AMD64
+#endif	// AMD64
 #else	// NEO_IA64
+#ifndef	_IA64_
 #define	_IA64_
+#endif	// _IA64_
+#ifndef	IA64
 #define	IA64
+#endif	// IA64
 #endif	// NEO_IA64
 #endif	// CPU_64
 #define	NDIS_MINIPORT_DRIVER
