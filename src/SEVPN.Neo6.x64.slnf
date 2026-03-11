@@ -1,0 +1,10 @@
+{
+  "solution": {
+    "path": "SEVPN.sln",
+    "projects": [
+      "BuildUtil\\BuildUtil.csproj",
+      "Neo\\Neo.vcxproj",
+      "Neo6\\Neo6.vcxproj"
+    ]
+  }
+}
