@@ -111,14 +111,6 @@
 static UINT max_speed = NEO_MAX_SPEED_DEFAULT;
 static bool keep_link = false;
 
-BOOLEAN
-PsGetVersion(
-			 PULONG MajorVersion OPTIONAL,
-			 PULONG MinorVersion OPTIONAL,
-			 PULONG BuildNumber OPTIONAL,
-			 PUNICODE_STRING CSDVersion OPTIONAL
-			 );
-
 // Memory related
 static NDIS_PHYSICAL_ADDRESS HighestAcceptableMax = NDIS_PHYSICAL_ADDRESS_CONST(-1, -1);
 NDIS_HANDLE ndis_wrapper_handle = NULL;
@@ -365,7 +357,7 @@ BOOL NeoNdisOnClose(IRP *irp, IO_STACK_LOCATION *stack)
 void NeoNdisCrash()
 {
 	NEO_QUEUE *q;
-	q = (NEO_QUEUE *)0xACACACAC;
+	q = (NEO_QUEUE *)(ULONG_PTR)0xACACACAC;
 	q->Size = 128;
 	NeoCopy(q->Buf, "ABCDEFG", 8);
 }

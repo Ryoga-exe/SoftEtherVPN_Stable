@@ -109,7 +109,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>StdCall</CallingConvention>
       <CompileAs>CompileAsC</CompileAs>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996;4391;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <PreLinkEvent>
       <Command>"$(BuildUtilPath)" /CMD:GenerateVersionResource "$(TargetPath)" /OUT:"$(NeoVersionResDir)$(ProjectName)_$(Platform).res" /PRODUCT:"SoftEther VPN"</Command>
@@ -128,7 +128,7 @@
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <EntryPointSymbol>DriverEntry</EntryPointSymbol>
-      <BaseAddress>0x10000</BaseAddress>
+      <BaseAddress>0x140000000</BaseAddress>
       <RandomizedBaseAddress />
       <FixedBaseAddress>false</FixedBaseAddress>
       <DataExecutionPrevention />
@@ -158,7 +158,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>StdCall</CallingConvention>
       <CompileAs>CompileAsC</CompileAs>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996;4391;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
       <AdditionalIncludeDirectories>"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\um";"$(NeoWindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -180,7 +180,7 @@
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <EntryPointSymbol>DriverEntry</EntryPointSymbol>
-      <BaseAddress>0x10000</BaseAddress>
+      <BaseAddress>0x140000000</BaseAddress>
       <RandomizedBaseAddress />
       <FixedBaseAddress>false</FixedBaseAddress>
       <DataExecutionPrevention />
