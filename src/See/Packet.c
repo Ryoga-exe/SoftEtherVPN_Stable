@@ -650,7 +650,7 @@ NTSTATUS NPF_IoControl(IN PDEVICE_OBJECT DeviceObject,IN PIRP Irp)
     ULONG               FunctionCode;
     NDIS_STATUS	        Status;
 	UINT				i;
-	PUCHAR				tpointer;
+	PUCHAR				tpointer = NULL;
 	ULONG				dim,timeout;
 	PUCHAR				prog;
 	PPACKET_OID_DATA    OidData;

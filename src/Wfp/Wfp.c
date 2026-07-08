@@ -388,7 +388,7 @@ UCHAR *ModificationOfIPsecESPPacket(UCHAR *ip_packet, UINT ip_packet_size, UINT 
 	{
 		WFP_IPV4_HEADER *ip = (WFP_IPV4_HEADER *)dst_data;
 
-		ip->TotalLength = Endian16(dst_size);
+		ip->TotalLength = Endian16((USHORT)dst_size);
 		ip->Checksum = 0;
 		ip->Checksum = IpChecksum(ip, ip_header_size);
 	}
@@ -396,7 +396,7 @@ UCHAR *ModificationOfIPsecESPPacket(UCHAR *ip_packet, UINT ip_packet_size, UINT 
 	{
 		WFP_IPV6_HEADER *ip = (WFP_IPV6_HEADER *)dst_data;
 
-		ip->PayloadLength = Endian16(dst_size);
+		ip->PayloadLength = Endian16((USHORT)dst_size);
 	}
 
 	// Adjust the new UDP header

@@ -107,12 +107,38 @@
 
 // Win32 DDK related
 #ifndef	CPU_64
+#ifndef	_X86_
 #define	_X86_
+#endif	// _X86_
+#ifndef	i386
 #define	i386
+#endif	// i386
 #else	// CPU_64
+#if defined(_ARM64_) || defined(ARM64)
+#ifndef	_ARM64_
+#define	_ARM64_
+#endif	// _ARM64_
+#ifndef	ARM64
+#define	ARM64
+#endif	// ARM64
+#elif !defined(NEO_IA64)
+#ifndef	_AMD64_
 #define	_AMD64_
+#endif	// _AMD64_
+#ifndef	AMD64
 #define	AMD64
+#endif	// AMD64
+#ifndef	x64
 #define	x64
+#endif	// x64
+#else	// NEO_IA64
+#ifndef	_IA64_
+#define	_IA64_
+#endif	// _IA64_
+#ifndef	IA64
+#define	IA64
+#endif	// IA64
+#endif	// NEO_IA64
 #endif	// CPU_64
 
 #define	STD_CALL
@@ -120,9 +146,13 @@
 #define	NT_UP						1
 #define	NT_INST						0
 #define	_NT1X_						100
+#ifndef	_WIN32_WINNT
 #define	_WIN32_WINNT				0x0600
+#endif	// _WIN32_WINNT
 #define	WINNT						1
+#ifndef	WINVER
 #define	WINVER						0x0600
+#endif	// WINVER
 #define	_WIN32_IE					0x0700
 #define	WIN32_LEAN_AND_MEAN			1
 #define	DEVL						1
@@ -132,7 +162,9 @@
 #define	NT
 #define	NDIS60						1
 #define	NDIS_SUPPORT_NDIS6			1
+#ifndef	NTDDI_VERSION
 #define	NTDDI_VERSION				0x06000100
+#endif	// NTDDI_VERSION
 
 #define	KMDF_MAJOR_VERSION_STRING	01
 #define	KMDF_MINOR_VERSION_STRING	009
