@@ -141,7 +141,9 @@
 #endif	// NEO_IA64
 #endif	// CPU_64
 
+#ifndef	STD_CALL
 #define	STD_CALL
+#endif	// STD_CALL
 #define	CONDITION_HANDLING			1
 #define	NT_UP						1
 #define	NT_INST						0
@@ -160,8 +162,16 @@
 #define	FPO							0
 #define	BINARY_COMPATIBLE			0
 #define	NT
+#if defined(_ARM64_) || defined(ARM64)
+#define	NDIS630						1
+#define	NDIS_SUPPORT_NDIS6			1
+#define	NDIS_SUPPORT_NDIS61			1
+#define	NDIS_SUPPORT_NDIS620		1
+#define	NDIS_SUPPORT_NDIS630		1
+#else
 #define	NDIS60						1
 #define	NDIS_SUPPORT_NDIS6			1
+#endif
 #ifndef	NTDDI_VERSION
 #define	NTDDI_VERSION				0x06000100
 #endif	// NTDDI_VERSION

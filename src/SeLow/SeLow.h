@@ -135,12 +135,21 @@
 #endif	// NEO_IA64
 #endif	// CPU_64
 #define	NDIS_MINIPORT_DRIVER
+// ARM64 requires NDIS 6.30 or later in current SDKs.
+#if defined(_ARM64_) || defined(ARM64)
+#define	NDIS630_MINIPORT
+#define	NDIS_SUPPORT_NDIS61			1
+#define	NDIS_SUPPORT_NDIS620		1
+#define NEO_NDIS_MAJOR_VERSION		6
+#define NEO_NDIS_MINOR_VERSION		30
+#else
 // NDIS 6.2
 #define	NDIS620_MINIPORT
 #define	NDIS_SUPPORT_NDIS61			1
 #define	NDIS_SUPPORT_NDIS620		1
 #define NEO_NDIS_MAJOR_VERSION		6
 #define NEO_NDIS_MINOR_VERSION		20
+#endif
 #define	NDIS_WDM					1
 
 #include <wdm.h>
