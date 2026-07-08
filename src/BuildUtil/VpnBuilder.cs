@@ -349,6 +349,181 @@ namespace BuildUtil
 		public static readonly string SoftEtherBuildDir = Env.SystemDir.Substring(0, 2) + @"\tmp\softether_build_dir";
 		public static readonly string OpenSourceDestDir = Env.SystemDir.Substring(0, 2) + @"\tmp\softether_oss_dest_dir";
 
+		static string ExecReadStdOut(string fileName, string arguments)
+		{
+			Process p = new Process();
+			try
+			{
+				p.StartInfo.FileName = fileName;
+				p.StartInfo.Arguments = arguments;
+				p.StartInfo.UseShellExecute = false;
+				p.StartInfo.CreateNoWindow = true;
+				p.StartInfo.RedirectStandardOutput = true;
+				p.StartInfo.RedirectStandardError = true;
+				p.Start();
+
+				string stdout = p.StandardOutput.ReadToEnd();
+				p.StandardError.ReadToEnd();
+				p.WaitForExit();
+
+				if (p.ExitCode == 0)
+				{
+					return stdout.Trim();
+				}
+			}
+			catch
+			{
+			}
+			finally
+			{
+				p.Close();
+			}
+
+			return null;
+		}
+
+		static string FindVisualStudioInstallationDir()
+		{
+			string dir = Environment.GetEnvironmentVariable("VSINSTALLDIR");
+			if (Str.IsEmptyStr(dir) == false && Directory.Exists(dir))
+			{
+				return IO.RemoteLastEnMark(dir);
+			}
+
+			string programFilesX86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+			if (Str.IsEmptyStr(programFilesX86) == false)
+			{
+				string vswhere = Path.Combine(programFilesX86, @"Microsoft Visual Studio\Installer\vswhere.exe");
+				if (File.Exists(vswhere))
+				{
+					string output = ExecReadStdOut(vswhere, "-latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath");
+					if (Str.IsEmptyStr(output) == false && Directory.Exists(output))
+					{
+						return IO.RemoteLastEnMark(output);
+					}
+				}
+			}
+
+			return null;
+		}
+
+		static string FindWindowsSdkRootDir()
+		{
+			string dir = Environment.GetEnvironmentVariable("WindowsSdkDir");
+			if (Str.IsEmptyStr(dir) == false && Directory.Exists(dir))
+			{
+				return IO.RemoteLastEnMark(dir);
+			}
+
+			string[] regKeys =
+			{
+				@"SOFTWARE\Microsoft\Windows Kits\Installed Roots",
+				@"SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots",
+				@"SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A",
+				@"SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A",
+			};
+
+			string[] valueNames =
+			{
+				"KitsRoot10",
+				"InstallationFolder",
+			};
+
+			foreach (string regKey in regKeys)
+			{
+				foreach (string valueName in valueNames)
+				{
+					dir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, regKey, valueName));
+					if (Str.IsEmptyStr(dir) == false && Directory.Exists(dir))
+					{
+						return dir;
+					}
+				}
+			}
+
+			return null;
+		}
+
+		static string FindWindowsSdkTool(string sdkRootDir, string toolName)
+		{
+			if (Str.IsEmptyStr(sdkRootDir))
+			{
+				return null;
+			}
+
+			string version = Environment.GetEnvironmentVariable("WindowsSDKVersion");
+			if (Str.IsEmptyStr(version) == false)
+			{
+				version = version.TrimEnd('\\');
+
+				string envPath = Path.Combine(sdkRootDir, @"bin\" + version + @"\x64\" + toolName);
+				if (File.Exists(envPath))
+				{
+					return envPath;
+				}
+			}
+
+			string[] directCandidates =
+			{
+				Path.Combine(sdkRootDir, @"bin\x64\" + toolName),
+				Path.Combine(sdkRootDir, @"bin\" + toolName),
+			};
+
+			foreach (string candidate in directCandidates)
+			{
+				if (File.Exists(candidate))
+				{
+					return candidate;
+				}
+			}
+
+			string binDir = Path.Combine(sdkRootDir, "bin");
+			if (Directory.Exists(binDir))
+			{
+				List<string> dirs = new List<string>(Directory.GetDirectories(binDir));
+				dirs.Sort(StringComparer.InvariantCultureIgnoreCase);
+				dirs.Reverse();
+
+				foreach (string dir in dirs)
+				{
+					string candidate = Path.Combine(dir, @"x64\" + toolName);
+					if (File.Exists(candidate))
+					{
+						return candidate;
+					}
+
+					candidate = Path.Combine(dir, toolName);
+					if (File.Exists(candidate))
+					{
+						return candidate;
+					}
+				}
+			}
+
+			return null;
+		}
+
+		static string FindMSBuildExe(string visualStudioInstallDir)
+		{
+			if (Str.IsEmptyStr(visualStudioInstallDir) == false)
+			{
+				string candidate = Path.Combine(visualStudioInstallDir, @"MSBuild\Current\Bin\MSBuild.exe");
+				if (File.Exists(candidate))
+				{
+					return candidate;
+				}
+			}
+
+			string dotnetFramework35Dir = Path.Combine(Env.WindowsDir, @"Microsoft.NET\Framework\v3.5");
+			string msbuild = Path.Combine(dotnetFramework35Dir, "MSBuild.exe");
+			if (File.Exists(msbuild))
+			{
+				return msbuild;
+			}
+
+			return null;
+		}
+
 		// Initialize
 		static Paths()
 		{
@@ -365,6 +540,8 @@ namespace BuildUtil
 				throw new ApplicationException(string.Format("'{0}' is not a VPN base directory.", Paths.BaseDirName));
 			}
 
+			string visualStudioInstallDir = null;
+
 			// Get the VC++ directory
 			// Visual Studio 2008
 			if (IntPtr.Size == 4)
@@ -375,6 +552,16 @@ namespace BuildUtil
 			{
 				Paths.VisualStudioVCDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Wow6432Node\Microsoft\VisualStudio\9.0\Setup\VC", "ProductDir"));
 			}
+
+			if (Str.IsEmptyStr(Paths.VisualStudioVCDir) || Directory.Exists(Paths.VisualStudioVCDir) == false)
+			{
+				visualStudioInstallDir = FindVisualStudioInstallationDir();
+				if (Str.IsEmptyStr(visualStudioInstallDir) == false)
+				{
+					Paths.VisualStudioVCDir = IO.RemoteLastEnMark(Path.Combine(visualStudioInstallDir, @"VC\Auxiliary\Build"));
+				}
+			}
+
 			if (Str.IsEmptyStr(Paths.VisualStudioVCDir))
 			{
 				throw new ApplicationException("Visual C++ directory not found.\n");
@@ -391,23 +578,26 @@ namespace BuildUtil
 				throw new ApplicationException(string.Format("File '{0}' not found.", Paths.VisualStudioVCBatchFileName));
 			}
 
-			bool x86_dir = false;
-
-			// Get Microsoft SDK 6.0a directory
-			if (IntPtr.Size == 4)
+			// Get Microsoft SDK directory
+			Paths.MicrosoftSDKDir = FindWindowsSdkRootDir();
+			if (Str.IsEmptyStr(Paths.MicrosoftSDKDir))
 			{
-				Paths.MicrosoftSDKDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v6.0A", "InstallationFolder"));
-			}
-			else
-			{
-				Paths.MicrosoftSDKDir = IO.RemoteLastEnMark(Reg.ReadStr(RegRoot.LocalMachine, @"SOFTWARE\Microsoft\Microsoft SDKs\Windows\v6.0A", "InstallationFolder"));
+				throw new ApplicationException("Microsoft SDK directory not found.\n");
 			}
 
 			// Get makecat.exe file name
-			Paths.MakeCatFilename = Path.Combine(Paths.MicrosoftSDKDir, @"bin\" + (x86_dir ? @"x86\" : "") + "makecat.exe");
+			Paths.MakeCatFilename = FindWindowsSdkTool(Paths.MicrosoftSDKDir, "makecat.exe");
+			if (File.Exists(Paths.MakeCatFilename) == false)
+			{
+				throw new ApplicationException(string.Format("File '{0}' not found.", Paths.MakeCatFilename));
+			}
 
 			// Get the rc.exe file name
-			Paths.RcFilename = Path.Combine(Paths.MicrosoftSDKDir, @"bin\" + (x86_dir ? @"x86\" : "") + "rc.exe");
+			Paths.RcFilename = FindWindowsSdkTool(Paths.MicrosoftSDKDir, "rc.exe");
+			if (File.Exists(Paths.RcFilename) == false)
+			{
+				throw new ApplicationException(string.Format("File '{0}' not found.", Paths.RcFilename));
+			}
 
 			// Get the cmd.exe file name
 			Paths.CmdFileName = Path.Combine(Env.SystemDir, "cmd.exe");
@@ -420,7 +610,7 @@ namespace BuildUtil
 			Paths.DotNetFramework35Dir = Path.Combine(Env.WindowsDir, @"Microsoft.NET\Framework\v3.5");
 
 			// Get msbuild.exe directory
-			Paths.MSBuildFileName = Path.Combine(Paths.DotNetFramework35Dir, "MSBuild.exe");
+			Paths.MSBuildFileName = FindMSBuildExe(visualStudioInstallDir);
 			if (File.Exists(Paths.MSBuildFileName) == false)
 			{
 				throw new ApplicationException(string.Format("File '{0}' not found.", Paths.MSBuildFileName));
