@@ -112,14 +112,6 @@ static UINT64 max_speed = NEO_MAX_SPEED_DEFAULT;
 static bool keep_link = false;
 static UINT reg_if_type = IF_TYPE_ETHERNET_CSMACD;
 
-BOOLEAN
-PsGetVersion(
-			 PULONG MajorVersion OPTIONAL,
-			 PULONG MinorVersion OPTIONAL,
-			 PULONG BuildNumber OPTIONAL,
-			 PUNICODE_STRING CSDVersion OPTIONAL
-			 );
-
 // Memory related
 static NDIS_PHYSICAL_ADDRESS HighestAcceptableMax = NDIS_PHYSICAL_ADDRESS_CONST(-1, -1);
 NDIS_HANDLE ndis_miniport_driver_handle = NULL;
@@ -342,7 +334,7 @@ NDIS_STATUS NeoNdisInitEx(NDIS_HANDLE MiniportAdapterHandle,
 	gen.AccessType = NET_IF_ACCESS_BROADCAST;
 	gen.DirectionType = NET_IF_DIRECTION_SENDRECEIVE;
 	gen.ConnectionType = NET_IF_CONNECTION_DEDICATED;
-	gen.IfType = reg_if_type;
+	gen.IfType = (NET_IFTYPE)reg_if_type;
 	gen.IfConnectorPresent = FALSE;
 	gen.SupportedStatistics =
 		NDIS_STATISTICS_FLAGS_VALID_DIRECTED_FRAMES_RCV |
@@ -799,7 +791,7 @@ BOOL NeoLoadRegistory()
 		LARGE_INTEGER current_time;
 		UCHAR *current_time_bytes;
 
-		KeQuerySystemTime(&current_time);
+		KeQuerySystemTimePrecise(&current_time);
 
 		current_time_bytes = (UCHAR *)&current_time;
 
@@ -1329,7 +1321,7 @@ void NeoCheckConnectState()
 	state.Header.Revision = NDIS_LINK_STATE_REVISION_1;
 	state.Header.Size = NDIS_SIZEOF_LINK_STATE_REVISION_1;
 
-	state.MediaDuplexState = NdisPauseFunctionsSendAndReceive;
+	state.MediaDuplexState = MediaDuplexStateFull;
 	state.XmitLinkSpeed = state.RcvLinkSpeed = max_speed;
 	state.PauseFunctions = NdisPauseFunctionsUnsupported;
 
