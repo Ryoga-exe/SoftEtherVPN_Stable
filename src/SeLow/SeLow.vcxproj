@@ -39,6 +39,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <Import Project="..\DriverBuild.props" />
   <PropertyGroup>
     <_ProjectFileVersion>18.0.11528.56</_ProjectFileVersion>
   </PropertyGroup>
@@ -173,12 +174,6 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SeLow.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BuildUtil\BuildUtil.csproj">
-      <Project>{384815c3-333c-4cec-9dcd-b6ab2602ebb9}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
