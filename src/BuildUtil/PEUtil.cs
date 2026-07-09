@@ -134,14 +134,29 @@ namespace BuildUtil
 		// Set the version of the PE header to 4 (to work in Windows 98, etc.)
 		public static void SetPEVersionTo4(byte[] srcData)
 		{
-			int offset = 0x140 + (int)((uint)srcData[0x3c] + ((uint)srcData[0x3d] * 256)) - 0xf8;
-
-			if (!((srcData[offset] == 0x04 || srcData[offset] == 0x05) && srcData[offset + 1] == 0x00))
+			if (srcData == null || srcData.Length < 0x40)
 			{
 				throw new ApplicationException("The specified file is not PE file.");
 			}
 
-			srcData[offset] = 0x04;
+			int peHeaderOffset = BitConverter.ToInt32(srcData, 0x3c);
+			int optionalHeaderOffset = peHeaderOffset + 0x18;
+			int subsystemVersionOffset = optionalHeaderOffset + 0x30;
+
+			if (peHeaderOffset < 0 ||
+				optionalHeaderOffset < 0 ||
+				subsystemVersionOffset < 0 ||
+				srcData.Length < subsystemVersionOffset + 2 ||
+				srcData[peHeaderOffset] != 'P' ||
+				srcData[peHeaderOffset + 1] != 'E' ||
+				srcData[peHeaderOffset + 2] != 0x00 ||
+				srcData[peHeaderOffset + 3] != 0x00)
+			{
+				throw new ApplicationException("The specified file is not PE file.");
+			}
+
+			srcData[subsystemVersionOffset] = 0x04;
+			srcData[subsystemVersionOffset + 1] = 0x00;
 		}
 		public static void SetPEVersionTo4(string fileName)
 		{

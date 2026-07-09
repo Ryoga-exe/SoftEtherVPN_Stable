@@ -65,6 +65,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <Import Project="..\DriverBuild.props" />
   <PropertyGroup>
     <_ProjectFileVersion>18.0.11528.56</_ProjectFileVersion>
   </PropertyGroup>
