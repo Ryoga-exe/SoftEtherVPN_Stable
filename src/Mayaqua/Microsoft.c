@@ -126,15 +126,14 @@ typedef enum    _PNP_VETO_TYPE {
 }   PNP_VETO_TYPE, *PPNP_VETO_TYPE;
 
 #define	_WIN32_IE			0x0600
-#define	_WIN32_WINNT		0x0502
-#define	WINVER				0x0502
 #define   SECURITY_WIN32
 #include <winsock2.h>
 #include <windows.h>
 #include <Wintrust.h>
 #include <Softpub.h>
-#include <Iphlpapi.h>
+#include <ws2def.h>
 #include <ws2ipdef.h>
+#include <Iphlpapi.h>
 #include <netioapi.h>
 #include <tlhelp32.h>
 #include <wincon.h>
@@ -13175,11 +13174,11 @@ NT_API *MsLoadNtApiFunctions()
 	if (nt->hSecur32 != NULL)
 	{
 		nt->GetUserNameExA =
-			(BOOL (__stdcall *)(EXTENDED_NAME_FORMAT,LPSTR,PULONG))
+			(BOOL (__stdcall *)(enum EXTENDED_NAME_FORMAT,LPSTR,PULONG))
 			GetProcAddress(nt->hSecur32, "GetUserNameExA");
 
 		nt->GetUserNameExW =
-			(BOOL (__stdcall *)(EXTENDED_NAME_FORMAT,LPWSTR,PULONG))
+			(BOOL (__stdcall *)(enum EXTENDED_NAME_FORMAT,LPWSTR,PULONG))
 			GetProcAddress(nt->hSecur32, "GetUserNameExW");
 
 		nt->LsaConnectUntrusted =

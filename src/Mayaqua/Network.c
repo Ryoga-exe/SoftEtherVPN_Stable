@@ -113,14 +113,13 @@
 
 #ifdef	WIN32
 // Include windows.h for Socket API
-#define	_WIN32_WINNT		0x0502
-#define	WINVER				0x0502
 #include <Ws2tcpip.h>
 #include <Wspiapi.h>
 #include <winsock2.h>
 #include <windows.h>
-#include <Iphlpapi.h>
+#include <ws2def.h>
 #include <ws2ipdef.h>
+#include <Iphlpapi.h>
 #include <netioapi.h>
 #include <Icmpapi.h>
 #include <fixed_Fwpmu.h>
