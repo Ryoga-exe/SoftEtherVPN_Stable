@@ -207,8 +207,8 @@ int PASCAL WinMain(HINSTANCE hInst, HINSTANCE hPrev, char *CmdLine, int CmdShow)
 #endif	// USE_PROBE
 
 // About Intel AES-NI Library
-#if	(defined(OS_WIN32) || (defined(UNIX_LINUX) && (defined(CPU_X86) || defined(CPU_X64))))
-// Supports only for Linux (x86 / x64) or Windows
+#if	((defined(OS_WIN32) && (defined(_M_IX86) || defined(_M_X64) || defined(CPU_X86) || defined(CPU_X64))) || (defined(UNIX_LINUX) && (defined(CPU_X86) || defined(CPU_X64))))
+// Supports only for Linux (x86 / x64) or Windows (x86 / x64)
 #define	USE_INTEL_AESNI_LIBRARY
 #endif
 
