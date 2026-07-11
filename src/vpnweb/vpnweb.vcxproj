@@ -45,15 +45,19 @@
     <_ProjectFileVersion>18.0.11528.56</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)bin\</OutDir>
+    <OutDir>$(SolutionDir)bin\not_signed\</OutDir>
     <IntDir>$(Platform)_$(Configuration)\</IntDir>
+    <TargetName>vpnweb</TargetName>
+    <TargetExt>.ocx</TargetExt>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)bin\</OutDir>
+    <OutDir>$(SolutionDir)bin\not_signed\</OutDir>
     <IntDir>$(Platform)_$(Configuration)\</IntDir>
+    <TargetName>vpnweb</TargetName>
+    <TargetExt>.ocx</TargetExt>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
@@ -66,7 +70,6 @@
       <DllDataFileName />
       <InterfaceIdentifierFileName>vpnweb_i.c</InterfaceIdentifierFileName>
       <ProxyFileName>vpnweb_p.c</ProxyFileName>
-      <ValidateAllParameters>false</ValidateAllParameters>
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -91,7 +94,7 @@
     </PreLinkEvent>
     <Link>
       <AdditionalDependencies>$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)not_signed\vpnweb.ocx</OutputFile>
+      <OutputFile>$(TargetPath)</OutputFile>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27amd64%27  publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <ModuleDefinitionFile>vpnweb.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -106,7 +109,7 @@
     <PostBuildEvent>
       <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:SetManifest "$(TargetPath)" /MANIFEST:x86_admin.manifest
 $(SolutionDir)bin\BuildUtil.exe /CMD:SignCode "$(TargetPath)" /COMMENT:"VPN Software" /KERNEL:no
-$(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVpnWebOcxCab "$(TargetPath)" /DEST:"$(OutDir)not_signed\vpnweb.cab"
+$(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVpnWebOcxCab "$(TargetPath)" /DEST:"$(OutDir)vpnweb.cab"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -118,7 +121,6 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVpnWebOcxCab "$(TargetPath)" /DEST:
       <DllDataFileName />
       <InterfaceIdentifierFileName>vpnweb_i.c</InterfaceIdentifierFileName>
       <ProxyFileName>vpnweb_p.c</ProxyFileName>
-      <ValidateAllParameters>false</ValidateAllParameters>
     </Midl>
     <ClCompile>
       <Optimization>Full</Optimization>
@@ -148,7 +150,7 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVpnWebOcxCab "$(TargetPath)" /DEST:
     </PreLinkEvent>
     <Link>
       <AdditionalDependencies>$(SolutionDir)tmp\VersionResources\$(ProjectName)_$(Platform).res;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)not_signed\vpnweb.ocx</OutputFile>
+      <OutputFile>$(TargetPath)</OutputFile>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft Visual Studio 8\VC\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27x86%27  publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <ModuleDefinitionFile>vpnweb.def</ModuleDefinitionFile>
@@ -166,7 +168,7 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVpnWebOcxCab "$(TargetPath)" /DEST:
     <PostBuildEvent>
       <Command>$(SolutionDir)bin\BuildUtil.exe /CMD:SetManifest "$(TargetPath)" /MANIFEST:x86_admin.manifest
 $(SolutionDir)bin\BuildUtil.exe /CMD:SignCode "$(TargetPath)" /COMMENT:"VPN Software" /KERNEL:no
-$(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVpnWebOcxCab "$(TargetPath)" /DEST:"$(OutDir)not_signed\vpnweb.cab"
+$(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVpnWebOcxCab "$(TargetPath)" /DEST:"$(OutDir)vpnweb.cab"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

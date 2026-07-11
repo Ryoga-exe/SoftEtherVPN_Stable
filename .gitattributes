@@ -1,0 +1,3 @@
+src/vpnweb/vpnweb.h whitespace=cr-at-eol
+src/vpnweb/vpnweb_i.c whitespace=cr-at-eol
+src/vpnweb/vpnweb_p.c whitespace=cr-at-eol
