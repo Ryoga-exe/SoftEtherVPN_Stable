@@ -391,7 +391,7 @@ namespace CoreUtil
 			{
 				if (e.IsFolder)
 				{
-					if (e.FileName.StartsWith("NET_", StringComparison.CurrentCultureIgnoreCase) && e.FileName.Length == 8)
+					if (e.FileName.StartsWith("NET_", StringComparison.CurrentCultureIgnoreCase))
 					{
 						string dirFullName = Path.Combine(Env.tempDir, e.fileName);
 						string lockFileName = Path.Combine(dirFullName, "LockFile.dat");
@@ -469,9 +469,7 @@ namespace CoreUtil
 
 			while (true)
 			{
-				byte[] rand = Secure.Rand(2);
-				string tmp2 = Str.ByteToStr(rand);
-
+				string tmp2 = processId.ToString("X8") + "_" + Guid.NewGuid().ToString("N");
 				string tmp = Path.Combine(Env.tempDir, "NET_" + tmp2);
 
 				if (IO.IsDirExists(tmp) == false && IO.MakeDir(tmp))
