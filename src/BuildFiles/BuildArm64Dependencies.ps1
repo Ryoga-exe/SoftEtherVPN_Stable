@@ -75,7 +75,7 @@ try {
     Push-Location $openSslBuild
     try {
         Invoke-NativeCommand perl.exe (Join-Path $OpenSslSource "Configure") `
-            VC-WIN64-ARM no-shared no-tests --release
+            VC-WIN64-ARM no-shared no-tests --release -Z7
         Invoke-NativeCommand nmake.exe /NOLOGO build_libs
     }
     finally {
@@ -90,7 +90,9 @@ try {
     Copy-Item -Path (Join-Path $ZlibSource "*") -Destination $zlibBuild -Recurse -Force
     Push-Location $zlibBuild
     try {
-        Invoke-NativeCommand nmake.exe /NOLOGO /f win32\Makefile.msc LOC=-MT zlib.lib
+        Invoke-NativeCommand nmake.exe /NOLOGO /f win32\Makefile.msc clean
+        Invoke-NativeCommand nmake.exe /NOLOGO /f win32\Makefile.msc `
+            "CFLAGS=-nologo -MT -W3 -O2 -Oy-" zlib.lib
     }
     finally {
         Pop-Location
