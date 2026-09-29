@@ -17,11 +17,26 @@
     </DriverSign>
   </ItemDefinitionGroup>
 
+  <!-- Use one host-tool configuration and let MSBuild order it before native projects. -->
+  <ItemGroup Condition="'$(PlatformToolset)' != 'WindowsKernelModeDriver10.0'">
+    <ProjectReference Include="$(SoftEtherSrcDir)BuildUtil\BuildUtil.csproj">
+      <Project>{384815C3-333C-4CEC-9DCD-B6AB2602EBB9}</Project>
+      <SetConfiguration>Configuration=Release</SetConfiguration>
+      <SetPlatform>Platform=AnyCPU</SetPlatform>
+      <GlobalPropertiesToRemove>VisualStudioVersion</GlobalPropertiesToRemove>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!-- WDK treats ProjectReference items as driver-package inputs, including C# tools. -->
   <Target Name="BuildSoftEtherBuildUtil"
           BeforeTargets="PreLinkEvent"
-          Condition="'$(SolutionDir)' != '' and Exists('$(SolutionDir)BuildUtil\BuildUtil.csproj')">
-    <MSBuild Projects="$(SolutionDir)BuildUtil\BuildUtil.csproj"
+          Condition="'$(PlatformToolset)' == 'WindowsKernelModeDriver10.0'">
+    <MSBuild Projects="$(SoftEtherSrcDir)BuildUtil\BuildUtil.csproj"
              Targets="Build"
-             Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+             Properties="Configuration=Release;Platform=AnyCPU"
+             RemoveProperties="VisualStudioVersion" />
   </Target>
 </Project>
