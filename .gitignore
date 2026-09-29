@@ -426,3 +426,14 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# SoftEther native intermediate and driver build outputs (dependency libraries remain tracked).
+/src/*/Win32_Debug/
+/src/*/Win32_Release/
+/src/*/x64_Debug/
+/src/*/x64_Release/
+/src/*/ARM64_Debug/
+/src/*/ARM64_Release/
+/src/BuiltDriverPackages/
+/src/DebugFiles/
+/src/tmp/
