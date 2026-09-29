@@ -40,6 +40,7 @@ $solutionOnly = & $buildScript -Platform x64 -SolutionOnly -PlanOnly
 Assert-True ($solutionOnly.Steps.Count -eq 1) "SolutionOnly must omit the extra driver builds."
 $debug = & $buildScript -Platform x64 -Configuration Debug -PlanOnly
 Assert-True ($debug.Steps[1].Configuration -eq "Release") "Drivers only have Release configurations."
+Assert-True ($debug.DependencyDirectory -eq (Join-Path $PSScriptRoot "Library\x64_Debug")) "Debug preflight must not use Release dependencies."
 $arm64 = & $buildScript -Platform ARM64 -PlanOnly
 Assert-True ($arm64.Steps.Count -eq 1) "ARM64 drivers are already part of the solution."
 Assert-True ($arm64.SelectedProjects.Count -eq 8) "ARM64 must select seven native projects and BuildUtil."
@@ -51,6 +52,7 @@ Assert-True ($win32.ExcludedProjects -contains "Neo") "Legacy x86 driver builds 
 Assert-Rejected { & $buildScript -Platform ARM64 -Configuration Debug -PlanOnly } "does not define"
 Assert-Rejected { & $buildScript -Platform x64 -MaxCpuCount 0 -PlanOnly } "ParameterArgumentValidationError"
 Assert-Rejected { & $buildScript -MSBuildPath (Join-Path $env:WINDIR "Microsoft.NET\Framework\v4.0.30319\MSBuild.exe") } "MSBuild 18 is required"
+& (Join-Path $PSScriptRoot "TestDependencyBuild.ps1") -PlansOnly
 
 foreach ($platform in @("Win32", "x64")) {
     foreach ($application in @("vpncmd", "vpnserver", "vpnclient")) {
@@ -76,6 +78,12 @@ try {
 finally {
     $heldLock.Dispose()
 }
+
+$hostProject = Join-Path $srcDirectory "BuildUtil\BuildUtil.csproj"
+& $MSBuildPath $hostProject /t:Build /p:Configuration=Release /p:Platform=AnyCPU `
+    /nr:false /nologo "/clp:ErrorsOnly;Summary"
+Assert-True ($LASTEXITCODE -eq 0) "BuildUtil could not be prepared for resource-generation tests."
+& (Join-Path $PSScriptRoot "TestVersionResources.ps1")
 
 # An unwritable destination must fail instead of silently leaving a stale executable.
 $scratch = Join-Path $PSScriptRoot ("logs\publish-test-" + [guid]::NewGuid().ToString("N"))

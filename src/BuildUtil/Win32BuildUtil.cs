@@ -216,17 +216,11 @@ namespace BuildUtil
 
 			f.Close();
 
-			ExecCommand(Paths.RcFilename, "\"" + filename + "\"");
+			string outPath = Path.GetFullPath(IO.InnerFilePath(outName));
+			Directory.CreateDirectory(Path.GetDirectoryName(outPath));
 
-			string rcDir = Path.GetDirectoryName(filename);
-			string rcFilename = Path.GetFileName(filename);
-			string rcFilename2 = Path.GetFileNameWithoutExtension(rcFilename);
-
-			string resFilename = Path.Combine(rcDir, rcFilename2) + ".res";
-
-			IO.MakeDirIfNotExists(Path.GetDirectoryName(outName));
-
-			IO.FileCopy(resFilename, outName, true, false);
+			// Let rc.exe write the final resource; avoid reopening/copying a temporary .res.
+			ExecCommand(Paths.RcFilename, string.Format("/fo \"{0}\" \"{1}\"", outPath, filename));
 		}
 
 		// Flush to disk
