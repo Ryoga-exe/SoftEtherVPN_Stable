@@ -83,6 +83,7 @@ $plan = [pscustomobject]@{
     SelectedProjects = $selected
     ExcludedProjects = $excluded
     Steps = $steps
+    DependencyDirectory = Join-Path $PSScriptRoot "Library\${Platform}_$Configuration"
 }
 if ($PlanOnly) {
     $plan
@@ -107,7 +108,7 @@ if ($msbuildVersion.FileMajorPart -ne 18) {
     throw "VS2026 MSBuild 18 is required, not $($msbuildVersion.FileVersion)."
 }
 foreach ($library in @("libeay32.lib", "ssleay32.lib", "zlib.lib")) {
-    $path = Join-Path $PSScriptRoot "Library\${Platform}_Release\$library"
+    $path = Join-Path $plan.DependencyDirectory $library
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
         throw "Dependency library is missing: $path. See README-VS2026.md."
     }
@@ -196,6 +197,7 @@ try {
             Log = Join-Path $runDirectory "$($step.Name).log"
             BinaryLog = Join-Path $runDirectory "$($step.Name).binlog"
             ExitCode = $null
+            LinkSafetyWarnings = 0
         }
         $summary.Results += $result
         Write-BuildSummary
@@ -211,6 +213,11 @@ try {
         Write-BuildSummary
         if ($result.ExitCode -ne 0) {
             throw "Build failed: $($step.Name), exit code $($result.ExitCode). Log: $($result.Log)"
+        }
+        $result.LinkSafetyWarnings = @(Select-String -LiteralPath $result.Log -Pattern '\bwarning LNK409[89]\b').Count
+        Write-BuildSummary
+        if ($result.LinkSafetyWarnings -gt 0) {
+            throw "Build linked with CRT conflicts or missing compiler PDBs (LNK4098/LNK4099): $($step.Name). Rebuild matching dependencies; see $($result.Log)."
         }
     }
 
