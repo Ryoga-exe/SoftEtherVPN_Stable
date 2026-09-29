@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "resource.h"
-#include "vpnweb.h"
+#include <vpnweb.h>
 
 extern "C" {
 HINSTANCE hDllInstance;

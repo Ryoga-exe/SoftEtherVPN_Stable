@@ -41,6 +41,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <Import Project="..\DriverBuild.props" />
   <PropertyGroup>
     <_ProjectFileVersion>18.0.11528.56</_ProjectFileVersion>
   </PropertyGroup>
@@ -64,6 +65,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <TypeLibraryName>vpnweb.tlb</TypeLibraryName>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <GenerateStublessProxies>true</GenerateStublessProxies>
       <HeaderFileName>vpnweb.h</HeaderFileName>
@@ -73,7 +76,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -115,6 +118,8 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVpnWebOcxCab "$(TargetPath)" /DEST:
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
+      <OutputDirectory>$(IntDir)</OutputDirectory>
+      <TypeLibraryName>vpnweb.tlb</TypeLibraryName>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <GenerateStublessProxies>true</GenerateStublessProxies>
       <HeaderFileName>vpnweb.h</HeaderFileName>
@@ -127,7 +132,7 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVpnWebOcxCab "$(TargetPath)" /DEST:
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(IntDir);$(SolutionDir)Mayaqua\win32_inc;.;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;VPN_SPEED;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>false</StringPooling>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -184,7 +189,7 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVpnWebOcxCab "$(TargetPath)" /DEST:
       </PrecompiledHeader>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsC</CompileAs>
     </ClCompile>
-    <ClCompile Include="vpnweb_i.c">
+    <ClCompile Include="$(IntDir)vpnweb_i.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsC</CompileAs>
@@ -204,7 +209,7 @@ $(SolutionDir)bin\BuildUtil.exe /CMD:GenerateVpnWebOcxCab "$(TargetPath)" /DEST:
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="vpnweb.h" />
+    <ClInclude Include="$(IntDir)vpnweb.h" />
     <ClInclude Include="VpnWebControl.h" />
     <ClInclude Include="vpnwebdlg.h" />
     <ClInclude Include="vpnwebdlg_inner.h" />

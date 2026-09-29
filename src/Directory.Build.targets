@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Keep Debug binaries from replacing the verified Release application set. -->
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)' == '.vcxproj' and '$(Configuration)' == 'Debug' and ('$(ConfigurationType)' == 'Application' or '$(ConfigurationType)' == 'DynamicLibrary')">
+    <OutDir>$(SoftEtherSrcDir)bin\Debug\$(Platform)\</OutDir>
+    <TargetDir>$(OutDir)</TargetDir>
+    <TargetPath>$(TargetDir)$(TargetFileName)</TargetPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(MSBuildProjectExtension)' == '.vcxproj' and '$(Configuration)' == 'Debug' and ('$(ConfigurationType)' == 'Application' or '$(ConfigurationType)' == 'DynamicLibrary')">
+    <Link>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>

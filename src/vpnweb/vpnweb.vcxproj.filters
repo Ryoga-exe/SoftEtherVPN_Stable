@@ -21,7 +21,7 @@
     <ClCompile Include="vpnweb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="vpnweb_i.c">
+    <ClCompile Include="$(IntDir)vpnweb_i.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VpnWebControl.cpp">
@@ -54,7 +54,7 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vpnweb.h">
+    <ClInclude Include="$(IntDir)vpnweb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VpnWebControl.h">
