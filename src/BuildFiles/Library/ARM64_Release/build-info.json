@@ -1,0 +1,34 @@
+﻿{
+    "SchemaVersion":  1,
+    "Platform":  "ARM64",
+    "Configuration":  "Release",
+    "OpenSSL":  "3.0.9",
+    "Zlib":  "1.2.11",
+    "CompilerVersion":  "19.51.36248.0",
+    "WindowsSDKVersion":  "10.0.26100.0\\",
+    "RuntimeLibrary":  "MT",
+    "DebugInformation":  "Z7",
+    "OpenSslTarget":  "SoftEther-VC-WIN64-ARM",
+    "OpenSslArguments":  [
+                             "no-shared",
+                             "no-tests",
+                             "no-makedepend",
+                             "--release"
+                         ],
+    "OpenSslConfigSHA256":  "F46526E48B01005475E0D83710BA7CC6E665E19A86C9E649A78F2C88A5397052",
+    "ZlibCFlags":  "-nologo -MT -W3 -O2 -Oy- -Z7",
+    "Archives":  [
+                     {
+                         "Name":  "libeay32.lib",
+                         "SHA256":  "1EBCD16927413F663C66919E99DC3110C1421A4BCBD7841928AD9E82909CFDA1"
+                     },
+                     {
+                         "Name":  "ssleay32.lib",
+                         "SHA256":  "984DD8F82D6F514AB35CFA60B5D5E073C799461CE2499C2BB48B4266020ADC39"
+                     },
+                     {
+                         "Name":  "zlib.lib",
+                         "SHA256":  "4757685A2309B9CC7A5A73194592D825F3E14016D42AFA1604B1C3BF2F932314"
+                     }
+                 ]
+}
